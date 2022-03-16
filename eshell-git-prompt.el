@@ -234,6 +234,16 @@ You can add your own theme to this list, then run
   (let ((root (locate-dominating-file directory ".git")))
     (and root (file-name-as-directory root))))
 
+(defun root-directory-p (file)
+  "Return non-nil if FILE is a root directory."
+  (if (fboundp 'ange-ftp-root-dir-p)
+      (ange-ftp-root-dir-p (file-name-as-directory file))
+    ;; This is essentially `ange-ftp-root-dir-p' applied to `file-name-as-directory'.
+    ;; If `ange-ftp-root-dir-p' changes, update this code.
+    (or (and (eq system-type 'windows-nt)
+             (string-match-p "\\`[a-zA-Z]:[/\\]\\'" (file-name-as-directory file)))
+        (string= "/" file))))
+
 (cl-defun eshell-git-prompt--shorten-directory-name
     (&optional (directory default-directory))
   "Return only current directory name (without ending slash).
@@ -245,9 +255,9 @@ For example:
   \"~\" => \"~\"
   \"/\" => \"/\""
   (let ((dir (abbreviate-file-name directory)))
-    (if (> (length dir) 1)
-        (file-name-nondirectory (substring dir 0 -1))
-      dir)))
+    (if (not (root-directory-p dir))
+	(file-name-nondirectory (substring dir 0 -1))
+      dir))
 
 (defun eshell-git-prompt--slash-str (str)
   "Make sure STR is ended with one slash, return it."
