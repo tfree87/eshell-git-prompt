@@ -257,7 +257,7 @@ For example:
   (let ((dir (abbreviate-file-name directory)))
     (if (not (root-directory-p dir))
 	(file-name-nondirectory (substring dir 0 -1))
-      dir))
+      dir)))
 
 (defun eshell-git-prompt--slash-str (str)
   "Make sure STR is ended with one slash, return it."
